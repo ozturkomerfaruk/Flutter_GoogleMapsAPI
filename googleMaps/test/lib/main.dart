@@ -41,8 +41,7 @@ class _HomePageState extends State<HomePage> {
     target: LatLng(_defaultLat, _defaultLng),
     zoom: 15,
   );
-
-  final Completer<GoogleMapController> _controller = Completer();
+  Completer<GoogleMapController> _controller = Completer();
 
   MapType _currentMapType = MapType.normal;
 
@@ -120,11 +119,11 @@ class _HomePageState extends State<HomePage> {
   void getCurrentLocation() async {
     Location location = Location();
 
+    GoogleMapController googleMapController = await _controller.future;
+
     await location.getLocation().then((value) {
       currentLocation = value;
     });
-
-    GoogleMapController googleMapController = await _controller.future;
 
     location.onLocationChanged.listen((newLoc) {
       currentLocation = newLoc;
@@ -138,28 +137,7 @@ class _HomePageState extends State<HomePage> {
       );
     });
 
-    print("ANANANANANANAN" + currentLocation!.altitude!.toString());
-
     setState(() {});
-  }
-
-  void setCustomMarkerIcon() {
-    BitmapDescriptor.fromAssetImage(
-            ImageConfiguration.empty, "assets/Pin_source.png")
-        .then((icon) {
-      sourceIcon = icon;
-    });
-    BitmapDescriptor.fromAssetImage(
-            ImageConfiguration.empty, "assets/Pin_destination.png")
-        .then((icon) {
-      destinationIcon = icon;
-    });
-
-    BitmapDescriptor.fromAssetImage(
-            ImageConfiguration.empty, "assets/Badge.png")
-        .then((icon) {
-      currentLocationIcon = icon;
-    });
   }
 
   void getPolyPoints() async {
@@ -178,10 +156,13 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void setCustomMarkerIcon() {
+    //BitmapDescriptor.fromAssetImage(configuration, assetName)
+  }
+
   @override
   void initState() {
     getCurrentLocation();
-    setCustomMarkerIcon();
     getPolyPoints();
     super.initState();
   }
@@ -216,21 +197,19 @@ class _HomePageState extends State<HomePage> {
                   //markers: _markers,
                   markers: {
                     Marker(
-                        markerId: const MarkerId("currentLocation"),
-                        position: LatLng(
-                          currentLocation!.latitude!,
-                          currentLocation!.longitude!,
-                        ),
-                        icon: currentLocationIcon),
-                    Marker(
-                      markerId: const MarkerId('source'),
-                      position: sourceLocation,
-                      icon: sourceIcon,
+                      markerId: const MarkerId("currentLocation"),
+                      position: LatLng(
+                        currentLocation!.latitude!,
+                        currentLocation!.longitude!,
+                      ),
                     ),
-                    Marker(
-                      markerId: const MarkerId('destination'),
+                    const Marker(
+                      markerId: MarkerId('source'),
+                      position: sourceLocation,
+                    ),
+                    const Marker(
+                      markerId: MarkerId('destination'),
                       position: destination,
-                      icon: destinationIcon,
                     ),
                   },
                   polylines: {
